@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.1 — 2026-09-02**
+**NORMATIVE — v1.2 — 2026-09-02**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -82,7 +82,7 @@ Touching anything out of scope requires asking the user first, every time.
 
 ### Shared select options
 
-```
+```text
 Area    : quanta | grad-school | etf | hardware | skills | fitness | career
 Source  : manual | claude | codex | grok | script
 Horizon : week | quarter | year | ongoing
@@ -112,7 +112,7 @@ Read through saved views only.
 | `Agent: Active Goals` | Goals | Status is `active` | — |
 | `Agent: OpID Lookup` | Log | none | Date desc |
 
-Only `Agent: Log 14d` currently exists. The rest are not yet built.
+All four views currently exist. `Agent: Log 14d` still has the known hardcoded-date defect described below.
 
 **Rules**
 
@@ -165,7 +165,7 @@ RATE LIMITS
 
 ### OpID
 
-```
+```text
 Format : {agent}-{YYYYMMDDTHHMMSS}-{slug}
 Example: claude-20260902T1041-p2-validation
 ```
@@ -210,7 +210,7 @@ Run through this before every write:
 1. Is the target one of `Goals` / `Tasks` / `Log`? If not — stop, ask.
 2. Is this a row create, or a single-property update? If not — stop, ask.
 3. Does every select value I am writing appear in §2? If not — use the closest listed value and flag it.
-4. Am I writing `GoalKey` rather than `Goal`? 
+4. Am I writing `GoalKey` rather than `Goal`?
 5. Have I set `OpID` and `Source`?
 6. Have I checked for an existing row with this `OpID`?
 7. Is this a Goals row I am modifying? If yes — stop. Propose via Log or a comment instead.
@@ -226,5 +226,6 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.2 | 2026-09-02 | Recorded P3 view deployment: `Agent: Open Tasks`, `Agent: Active Goals`, and `Agent: OpID Lookup` now exist; all four normative views are live. |
 | v1.1 | 2026-09-02 | Promoted `Log.Goal` (`relation → Goals`) from planned to authoritative schema. Agents still write `GoalKey` only; `Goal` remains human-maintained. |
 | v1.0 | 2026-09-02 | Split out of DESIGN v3.0 (§5 schema, §6 views, §7 protocol, §9 backup). Added §0 precedence, §1 scope, §6 checklist, §7 change control. |
