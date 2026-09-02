@@ -79,9 +79,7 @@ Expected result:
 
 ### 1. 建立 Notion 結構
 
-目前 workspace 只有 `Log` 一張表，位於頂層。完整結構尚未建立。
-
-目標結構：
+P3 已完成。目前 workspace 結構：
 
 ```text
 Peter Wang's Space
@@ -91,22 +89,18 @@ Peter Wang's Space
    └─ Log                     database
 ```
 
-Schema 欄位定義見 `personal-dashboard-OPERATIONS.md` §2。建表時以該檔為準，不要憑記憶填欄位。
+Schema 欄位定義見 `personal-dashboard-OPERATIONS.md` §2。建表或改 schema 時以該檔為準，不要憑記憶填欄位。
 
-GUI-operation-pseudocode:
+目前已存在的 agent views：
 
 ```text
-1. Open Notion
-2. In sidebar, click + next to Private
-3. Name the page "Dashboard"
-4. Inside Dashboard, type /database and select "Table - Full page"
-5. Name it "Goals"; add properties per OPERATIONS §2
-6. Repeat for "Tasks"
-7. Drag existing "Log" database into Dashboard
-8. Confirm all three appear nested under Dashboard in sidebar
+Agent: Log 14d
+Agent: Open Tasks
+Agent: Active Goals
+Agent: OpID Lookup
 ```
 
-亦可請已連線的 agent 執行；agent 須先讀 OPERATIONS。
+`Agent: Log 14d` 仍有已知缺陷：filter 是 hardcoded 日期，不是真正 rolling 14-day window。
 
 ### 2. 接上互動路徑
 
@@ -334,22 +328,22 @@ Expected result:
 確認 view mode 可讀：
 
 ```text
-Call notion-query-data-sources with mode "view" on the "Agent: Log 14d" view.
+Call notion-query-data-sources with mode "view" on each agent view.
 ```
 
 Expected result:
 
 ```text
-回傳該 view 的列陣列；空表時回傳空陣列而非錯誤
+每個 view 回傳列陣列；空表時回傳空陣列而非錯誤
 ```
 
 ### Manual Verification
 
 ```text
 1. Open Notion on mobile
-2. Navigate to the Log database
-3. Confirm the row just written by the agent appears
-4. Confirm its Source and OpID match what the agent reported
+2. Navigate to Dashboard
+3. Confirm Goals / Tasks / Log all appear under Dashboard
+4. Confirm agent views are visible on their corresponding databases
 ```
 
 ### Evidence Format
@@ -370,69 +364,29 @@ PASS / FAIL
 
 ### Observed Results
 
-以下為 2026-09-02 實際執行結果，非預期值。
+截至 2026-09-02：
 
 ```text
-Command:
-notion-fetch id="self"
-
-Status:
-ok
-
-Output summary:
-workspace "Peter Wang's Space" (754f2ec5-7392-818d-8cfa-000384801235)
-query_data_sources: available_with_limit
-query_multiple_data_sources: full_version_required
-query_meeting_notes: plan_required
-all other tools: available
-
-Result:
-PASS
+P1: PASS
+P2: PASS
+P3: PASS
 ```
+
+P3 evidence summary：
 
 ```text
-Command:
-notion-query-data-sources mode="view" view_url="view://3cff2ec5-7392-8164-bfa0-000cec75fadc"
-
-Status:
-ok
-
-Output summary:
-1 row returned; Source=codex, OpID=p2-20260902-1041-chatgpt-001
-
-Result:
-PASS
+Dashboard page created
+Goals database created with OPERATIONS schema
+Tasks database created with OPERATIONS schema
+Log moved under Dashboard
+Log.Goal -> Goals relation created
+Tasks.Goal -> Goals relation created
+Agent: Open Tasks created
+Agent: Active Goals created
+Agent: OpID Lookup created
 ```
 
-```text
-Command:
-notion-create-pages (draft, DESIGN page)
-
-Status:
-ok
-
-Output summary:
-page created, id 3cff2ec5-7392-8120-a3da-fdfcf1e3a2e4
-
-Result:
-PASS
-```
-
-```text
-Command:
-notion-create-pages (draft, OPERATIONS page)
-
-Status:
-error
-
-Output summary:
-No approval received
-
-Result:
-FAIL
-```
-
-尚未執行、僅為預期值的項目：排程路徑的 `curl` 檢查、`Agent: Open Tasks`、`Agent: Active Goals`、`Agent: OpID Lookup` 三個 view（尚未建立）。
+尚未執行、僅為預期值的項目：排程路徑的 `curl` 檢查（P4/P5）。
 
 ## Troubleshooting
 
@@ -476,47 +430,6 @@ Expected result:
 
 ```text
 回傳 workspace 身分，代表工具已恢復
-```
-
-### create_pages returns "No approval received"
-
-Symptom:
-
-```text
-No approval received
-```
-
-Diagnosis:
-
-```text
-Compare against a prior successful create_pages call in the same session.
-If parameters are equivalent, the failure is client-side approval, not the payload.
-```
-
-Likely cause:
-
-```text
-客戶端的寫入核准機制未通過。已觀察到同 session 內先成功後失敗。
-```
-
-Fix:
-
-```text
-1. Retry the call
-2. If it fails again, create the page manually in Notion
-3. Or import the markdown file: Notion > Import > Markdown
-```
-
-Verify:
-
-```text
-Call notion-fetch on the new page ID and confirm content.
-```
-
-Expected result:
-
-```text
-回傳頁面內容
 ```
 
 ### query_multiple_data_sources fails
