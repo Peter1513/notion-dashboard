@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.1 — 2026-09-02**
+**NORMATIVE — v1.0 — 2026-09-02**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -73,12 +73,13 @@ Touching anything out of scope requires asking the user first, every time.
 | Name | title | |
 | Date | date | |
 | Area | select | |
-| GoalKey | text | Agents write this |
-| Goal | relation → Goals | Human-maintained in the UI. Agents never write it. |
+| GoalKey | text | |
 | Delta | text | What changed |
 | Evidence | url | Link only. Never upload files (5 MB cap on this plan). |
 | OpID | text | See §4 |
 | Source | select | |
+
+> `Log.Goal (relation → Goals)` is planned but **not yet created**. Do not reference it until this document says it exists.
 
 ### Shared select options
 
@@ -226,5 +227,4 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
-| v1.1 | 2026-09-02 | Promoted `Log.Goal` (`relation → Goals`) from planned to authoritative schema. Agents still write `GoalKey` only; `Goal` remains human-maintained. |
 | v1.0 | 2026-09-02 | Split out of DESIGN v3.0 (§5 schema, §6 views, §7 protocol, §9 backup). Added §0 precedence, §1 scope, §6 checklist, §7 change control. |
