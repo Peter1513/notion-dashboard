@@ -216,5 +216,5 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v2 | 2026-09-02 | 依 Free 方案實測收斂為 3 表；Area 改 select；agent 讀 view 不跑 SQL |
 | v3.0 | 2026-09-02 | 加 GoalKey 與 OpID；否決 write broker；確立雙路徑存取；修正 `update_page` 語意描述；撤回「Notion 唯一符合」與「Grok connectors 限付費」兩項錯誤陳述 |
 | v3.1 | 2026-09-02 | 拆出 OPERATIONS v1.0（schema / view / 寫入規約 / 備份）；本檔改為純決策紀錄；修正 v3.0 章節編號重複（兩個「2.」）；加 §0 文件關係 |
-| v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
 | v3.2 | 2026-09-02 | P3 完成：Dashboard/Goals/Tasks/Log 結構、relations 與三個缺少的 agent views 已部署；清理 `__noop__` 待辦。 |
+| v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
