@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.2 — 2026-09-02**
+**NORMATIVE — v1.3 — 2026-09-03**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -107,12 +107,12 @@ Read through saved views only.
 
 | View | Source | Filter | Sort |
 |---|---|---|---|
-| `Agent: Log 14d` | Log | Date within the last 14 days | Date desc |
+| `Agent: Log YYYY-MM` | Log | `Date >= YYYY-MM-01` and `Date < next-month-01` | Date desc |
 | `Agent: Open Tasks` | Tasks | Status is not `done` | Due asc |
 | `Agent: Active Goals` | Goals | Status is `active` | — |
 | `Agent: OpID Lookup` | Log | none | Date desc |
 
-All four views currently exist. `Agent: Log 14d` still has the known hardcoded-date defect described below.
+The monthly Log views `Agent: Log 2026-01` through `Agent: Log 2026-12` currently exist. The other three views listed above also exist.
 
 **Rules**
 
@@ -121,7 +121,12 @@ All four views currently exist. `Agent: Log 14d` still has the known hardcoded-d
 - Never `query_multiple_data_sources`. It requires Business + Notion AI and will fail.
 - If you need a cross-database answer, read each view separately and join in your own reasoning.
 
-**Known defect**: `Agent: Log 14d` is filtered on a hardcoded date, not a rolling window. It drifts. If results look stale, say so rather than concluding the Log is empty.
+**Monthly Log selection**
+
+- For one month, query the exact `Agent: Log YYYY-MM` view.
+- For a range spanning multiple months, query each corresponding monthly view separately and combine the results in your own reasoning.
+- A future-month view is valid and returns an empty result until matching rows exist.
+- Do not infer that Log is empty merely because one monthly view is empty.
 
 ---
 
@@ -153,6 +158,7 @@ WRITE
 
 READ
 - Use saved views: query_data_sources with mode "view".
+- For Log reads, use the exact `Agent: Log YYYY-MM` view for each required month.
 - Do not run SQL. Single-source SQL is metered on this plan; view mode is not.
 
 RATE LIMITS
@@ -226,6 +232,7 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.3 | 2026-09-03 | Replaced `Agent: Log 14d` with twelve calendar-month views, `Agent: Log 2026-01` through `Agent: Log 2026-12`; defined exact inclusive-start/exclusive-end boundaries and multi-month read behavior. |
 | v1.2 | 2026-09-02 | Recorded P3 view deployment: `Agent: Open Tasks`, `Agent: Active Goals`, and `Agent: OpID Lookup` now exist; all four normative views are live. |
 | v1.1 | 2026-09-02 | Promoted `Log.Goal` (`relation → Goals`) from planned to authoritative schema. Agents still write `GoalKey` only; `Goal` remains human-maintained. |
 | v1.0 | 2026-09-02 | Split out of DESIGN v3.0 (§5 schema, §6 views, §7 protocol, §9 backup). Added §0 precedence, §1 scope, §6 checklist, §7 change control. |
