@@ -23,6 +23,8 @@
 
 解決的問題：個人紀錄散落各處，且多個 AI agent 各自寫入時無法追溯來源、無法還原誤寫。
 
+> 專案文件只以 GitHub `beta` branch 為來源。Notion 內不維護 DESIGN / OPERATIONS 鏡像；操作前先讀指定 branch 的文件。
+
 ## Requirements
 
 Known-good environment:
@@ -156,42 +158,45 @@ Grok —— GUI-operation-pseudocode:
 4. Confirm Notion appears in the connector list
 ```
 
-### 3. 建立排程路徑 token
+### 3. 建立排程路徑 token — P4（DEFERRED）
 
-僅在需要無人值守寫入時執行。hosted MCP 不支援非互動授權，故排程必須走 REST API + token。
+P4 目前暫緩，不視為完成；P5 亦不得因此視為已啟動。以下保留目前官方 UI 路徑，供未來恢復 P4 時使用。
 
 GUI-operation-pseudocode:
 
 ```text
-1. Open the Notion developer portal
-2. Create a new internal connection, bound to this workspace
-3. In Capabilities, enable ONLY "Read content" and "Insert content"
-4. Leave "Update content" disabled
-5. Copy the installation access token from the Configuration tab
-6. Open the Dashboard page in Notion
-7. Click ••• > Add connections > select the new connection
-8. Confirm child databases inherit the connection
+1. Open Notion Web/Desktop
+2. Settings > Developer > enable developer features
+3. Return to the main sidebar > Developer > Connections
+4. Click + New connection
+5. Bind the connection to Peter Wang's Space
+6. In Capabilities, enable ONLY "Read content" and "Insert content"
+7. Leave "Update content" disabled
+8. Keep user-information access disabled unless a future requirement explicitly needs it
+9. Retrieve/copy the installation access token; never paste it into chat or commit it to git
+10. Open the Dashboard page
+11. Click ••• > Add connections > select the new connection
+12. Do not separately connect unrelated workspace pages
 ```
 
-存入環境變數：
-
-```bash
-export NOTION_TOKEN='<installation-access-token>'
-```
-
-Expected result:
+Scope target：
 
 ```text
-變數已設定；token 不進原始碼、不進 git
+Dashboard
+├─ Goals
+├─ Tasks
+└─ Log
 ```
 
-未 connect 的頁面，API 請求一律回錯。若 token 可讀到 Dashboard 以外的內容，代表 connect 範圍錯了，需回到步驟 6 檢查。
+P4 的目的不是讓 connection 自己執行工作，而是建立 P5 未來 scheduler 的 service identity：token 驗證身分、Capabilities 限制「能做什麼」、Dashboard sharing 限制「能碰哪裡」。
+
+本機 Bash 不是 P4/P5 的必要條件。未來 REST verification / scheduler 可改由 PowerShell、GitHub Actions、其他可信主機或等價 HTTPS client 執行；credential 必須使用 secret/environment storage，不進 repo。
 
 ### Deploy Notes
 
 ```text
 Free 方案單檔上傳上限 5 MB。Evidence 欄只放 URL，不上傳檔案。
-不勾 Update content 是本專案唯一的硬約束；勾了就失去防護。
+若恢復 P4，不勾 Update content 是排程路徑的核心硬約束。
 ```
 
 ## Boot
@@ -216,47 +221,18 @@ notion 顯示為已連線
 
 ### Status — 排程路徑
 
-```bash
-curl -fsS -X POST https://api.notion.com/v1/search \
-  -H "Authorization: Bearer $NOTION_TOKEN" \
-  -H "Notion-Version: 2022-06-28" \
-  -H "Content-Type: application/json" \
-  -d '{"page_size":1}'
-```
-
-Expected result:
-
-```text
-HTTP 200 與 JSON results 陣列；未 connect 時回 object_not_found
-```
-
-此指令尚未在本專案實測，`Notion-Version` 值須依你建立 connection 時的 API 版本調整。
-
-### Restart
-
-連線失效時的處理是重新授權，非重啟：
-
-```bash
-claude mcp remove notion
-claude mcp add --transport http notion https://mcp.notion.com/mcp
-```
-
-Expected result:
-
-```text
-移除後重加；於 Claude Code 內 /mcp 重走 OAuth
-```
+目前 **DEFERRED / NOT VERIFIED**。恢復 P4 後，應以當時 Notion 官方最新 API version 與實際執行環境建立唯讀 smoke test；不要把下列舊版 Bash/curl 範例視為已驗證基準。
 
 ## Operation Guide
 
 ### Common Workflow
 
 ```text
-1. 開啟任一 agent，確認 Notion 已連線
-2. 讓 agent 讀 OPERATIONS，取得 schema 與規約
+1. Fetch README / OPERATIONS / DESIGN from GitHub beta
+2. 開啟任一 agent，確認 Notion 已連線
 3. 依需求月份讀 Agent: Log YYYY-MM，並讀 Agent: Open Tasks / Agent: Active Goals
 4. 寫入 Log 或 Tasks，每列帶 OpID 與 Source
-5. 每週匯出 CSV 進 git repo
+5. Weekly CSV export remains planned under P5, not active yet
 ```
 
 ### Common Commands
@@ -288,14 +264,14 @@ Expected result:
 Schema 或 view 變更一律文件先行：
 
 ```text
-1. Edit personal-dashboard-OPERATIONS.md, bump its version
-2. Commit to git
+1. Edit personal-dashboard-OPERATIONS.md on beta, bump its version
+2. Commit to beta
 3. Apply the change in Notion
 4. Re-run the smoke test in Verification
 5. If Notion and OPERATIONS disagree, OPERATIONS wins; fix Notion
 ```
 
-反向操作（先改 Notion 再補文件）會讓 agent 依過期規約寫入，是本專案最常見的失效模式。
+Notion 不再保存 DESIGN / OPERATIONS 文件鏡像，因此不存在「同步 Notion 文件頁」這一步。
 
 ### Logs
 
@@ -365,15 +341,18 @@ PASS / FAIL
 
 ### Observed Results
 
-截至 2026-09-02：
+截至 2026-09-03：
 
 ```text
 P1: PASS
 P2: PASS
 P3: PASS
+P3.1: PASS
+P4: DEFERRED / NOT VERIFIED
+P5: NOT STARTED
 ```
 
-P3 evidence summary：
+P3/P3.1 evidence summary：
 
 ```text
 Dashboard page created
@@ -385,10 +364,9 @@ Tasks.Goal -> Goals relation created
 Agent: Open Tasks created
 Agent: Active Goals created
 Agent: OpID Lookup created
-Agent: Log 14d replaced by Agent: Log 2026-01 through Agent: Log 2026-12 (2026-09-03)
+Agent: Log 14d replaced by Agent: Log 2026-01 through Agent: Log 2026-12
+2026-09-03 re-fetch confirmed Dashboard/Goals/Tasks/Log and views remain structurally consistent
 ```
-
-尚未執行、僅為預期值的項目：排程路徑的 `curl` 檢查（P4/P5）。
 
 ## Troubleshooting
 
@@ -528,3 +506,5 @@ Main files:
 - `README.md`: deploy、boot、operation、verification、troubleshooting 說明。
 - `personal-dashboard-OPERATIONS.md`: 規範性文件。schema、view、agent 寫入規約、復原範圍。Agent 必須遵循；規則衝突時以此檔為準。
 - `personal-dashboard-DESIGN.md`: 決策紀錄。選型理由、被否決的方案、已驗證與未驗證的事實。
+
+All three are maintained on GitHub `beta`; no Notion documentation mirror is maintained.

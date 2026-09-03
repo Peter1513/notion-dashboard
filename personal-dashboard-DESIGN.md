@@ -1,8 +1,8 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.3
+- **版本**：v3.4
 - **日期**：2026-09-03
-- **狀態**：P1/P2/P3 完成，P4 起未動工
+- **狀態**：P1/P2/P3/P3.1 完成；P4 暫緩；P5 未開始
 
 ---
 
@@ -18,7 +18,7 @@
 
 **規則衝突時以 OPERATIONS 為準。** README 說明怎麼做，本檔解釋為什麼，兩者皆不定義規則。Agent 不應從本檔推導行為。
 
-權威副本在 git repo。Notion 頁面是方便閱讀的鏡像，可能落後。
+權威副本只存在 GitHub `beta` branch。2026-09-03 起不再於 Notion 維護 DESIGN / OPERATIONS 文件鏡像；後續 agent 必須先讀指定 branch 的文件，而不是搜尋 Notion 內的規則頁。
 
 ---
 
@@ -64,7 +64,7 @@
 
 | # | 弱點 | 緩解 | 定義於 |
 |---|---|---|---|
-| 1 | hosted MCP 無 subtree OAuth scoping，以登入者完整權限行動 | internal connection token 路徑 | 本檔 §3 |
+| 1 | hosted MCP 無 subtree OAuth scoping，以登入者完整權限行動 | internal connection token 路徑（P4，目前暫緩） | 本檔 §3 |
 | 2 | 無文件化的 CAS / ETag / idempotency key | OpID 欄位 + 序列化人工驅動 | OPERATIONS §4 |
 | 3 | CSV 匯出不保留 relation 語意 | GoalKey 文字欄 | OPERATIONS §2 |
 
@@ -72,7 +72,7 @@
 
 ## 3. 存取架構
 
-存取模式 = **B（互動為主 + 少量排程）**。
+目前實際啟用的是互動路徑；排程路徑仍是設計目標，但 P4/P5 已暫緩。
 
 ```text
                    ┌─ Claude  (claude.ai / Claude Code)
@@ -80,9 +80,14 @@
 mcp.notion.com/mcp └─ Grok    (Connector Catalog)
    OAuth，你本人身分，完整權限
                                               ──> Notion
-排程路徑 ──────────── 你的 script (pasoko / GitHub Actions)
-Notion REST API        internal connection token
-   最小權限
+
+排程路徑（DEFERRED）
+script / GitHub Actions / other trusted HTTPS client
+        │
+        ▼
+Notion REST API
+internal connection token
+Read + Insert only / Update disabled
 ```
 
 ### 互動路徑
@@ -93,11 +98,13 @@ Notion REST API        internal connection token
 | ChatGPT web | 用 directory 的 **Notion 官方 app**（Developer 標為 Notion，含 Write） | **不要走 Developer Mode custom MCP** — Pro 只能 read/fetch，Plus 無此路徑 |
 | Grok | Connector Catalog 的 Notion（第三方 OAuth，非 xAI built-in） | 出事找 Notion 不是找 xAI |
 
-### 排程路徑
-- 用 **internal connection**，不用 PAT。PAT 以建立者身分行動、繼承完整權限，等於把 hosted MCP 的問題原樣搬過來。
-- Capabilities 只勾 **Read content + Insert content**。**不勾 Update content** —— 從技術層面消滅「排程 job 覆蓋手動編輯」這個 failure mode。這是整套設計中唯一的硬約束。
-- 頁面必須手動 connect：頁面 `•••` → Add connections → 選該 connection。未 connect 的頁面 API 一律回錯。
-- Token 存環境變數，不進原始碼、不進版控。
+### 排程路徑（P4/P5，DEFERRED）
+- 預定仍使用 **internal connection**，不用 PAT。
+- 預定 capabilities：**Read content + Insert content**；**Update content 關閉**。
+- 預定只將 connection 掛到 `Dashboard` subtree。
+- Token 應存 secret manager / environment storage，不進原始碼、不進版控、不貼入聊天。
+- Local Bash 不是必要執行環境；未來可由 PowerShell、GitHub Actions、其他可信主機或等價 HTTPS client 驗證與執行。
+- 目前 connection/scheduler 尚未完成驗證，因此不能宣告上述 hard constraint 已實際部署。
 
 ### 行事曆
 Google Calendar 為唯一真值。Notion 的 `Tasks.Due` 只是提醒欄，不做雙向同步。
@@ -116,7 +123,7 @@ Peter Wang's Space (Free)
    └─ Log                     database
 ```
 
-母 page 是必要的，不是美觀考量：沒有它，排程路徑的最小權限就得逐張表 connect，且新增表時容易漏。
+母 page 是必要的，不是美觀考量：沒有它，未來排程路徑的最小權限就得逐張表 connect，且新增表時容易漏。
 
 Schema 定義見 **OPERATIONS §2**。
 
@@ -160,9 +167,10 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | `query_meeting_notes` | `plan_required` | 同上 |
 | create/update page、create_database、create_view、move_pages、comments | 全部 `available` | 同上 |
 | hosted MCP 非互動授權 | **不支援**。官方 FAQ：目前必須完成 OAuth flow，非互動授權開發中 | fetch 官方文件 |
-| internal connection | 靜態 token；需 workspace owner；頁面須手動 connect，否則 API 回錯 | 官方 authorization doc |
+| internal connection design | capability 可區分 Read / Insert / Update；page sharing 決定 content scope | 官方文件；尚未完成 P4 live verification |
 | P3 workspace structure | `Dashboard` 下已有 `Goals`、`Tasks`、`Log`；`Log.Goal` 與 `Tasks.Goal` 都指向 `Goals` | 2026-09-02 MCP create/fetch/move verification |
 | Agent views | `Agent: Log 2026-01`～`2026-12`、`Agent: Open Tasks`、`Agent: Active Goals`、`Agent: OpID Lookup` 皆存在 | 2026-09-03 MCP create/fetch/view-mode verification |
+| P3/P3.1 re-check | Dashboard/Goals/Tasks/Log 與既有 views 仍符合 OPERATIONS schema | 2026-09-03 live fetch verification |
 
 ### 引用他處、本人未逐一驗證
 
@@ -182,28 +190,32 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 ## 7. 建置進度
 
 ```text
-✅ P1  Log 表 + initial agent Log view           (2026-09-02, by codex)
-✅ P2  create → view mode read 驗證通過           (2026-09-02)
-✅ P3  Dashboard + Goals + Tasks + Log；
-       3 個新 agent views；Log.Goal relation       (2026-09-02)
-✅ P3.1 以 2026-01～2026-12 月度 Log views
-       取代 rolling 14-day view                    (2026-09-03)
-⬜ P4  建 internal connection，只 connect Dashboard 子樹
-       capabilities: Read + Insert only
-⬜ P5  排程 script：append Log + weekly CSV export
+✅ P1    Log 表 + initial agent Log view           (2026-09-02, by codex)
+✅ P2    create → view mode read 驗證通過           (2026-09-02)
+✅ P3    Dashboard + Goals + Tasks + Log；
+         3 個新 agent views；Log.Goal relation       (2026-09-02)
+✅ P3.1  以 2026-01～2026-12 月度 Log views
+         取代 rolling 14-day view                    (2026-09-03)
+⏸ P4    internal connection / Dashboard subtree
+         Read + Insert only；Update disabled          DEFERRED
+⬜ P5    排程 script：append Log + weekly CSV export  NOT STARTED
 ```
 
-每完成一階段，同步更新 OPERATIONS 的 §2 / §3 對應狀態。**OPERATIONS 先改，Notion 後動** —— 文件領先實作，不是反過來。
+目前 core dashboard implementation 可視為完成；scheduled automation path 暫緩，不因曾開始研究 P4 UI 而視為部分完成。
 
 ### 待處理
+- 若恢復 P4：依當時最新官方 Developer UI 建 connection、設定 capabilities、只 connect Dashboard、再做 scope/API verification。
+- P4 驗證完成後才進 P5。
 - 2027 年開始前，依同一個月度邊界規則建立 `Agent: Log 2027-01`～`2027-12`，並先更新 OPERATIONS 版本。
 
 ### 已清理
 - `__noop__` database 已於 2026-09-02 手動刪除，後續 workspace search 已確認 active workspace 不再存在該 database。
+- 舊 Notion DESIGN / rules 文件鏡像已於 2026-09-03 由 owner 手動移除；後續只使用 GitHub `beta` 文件。
 
 ### 未解問題
 - ChatGPT 方案別未確認（影響 web 端是否可寫）
 - Free 方案 SQL 配額實際數字未知（架構已避開，僅供參考）
+- P4 scheduler execution environment 尚未決定；Local Bash 已明確不是必要前提
 - 若日後轉為無人值守大量寫入，需重新評估 Airtable（PAT 可 scope 到單一 base、Web API 有 `performUpsert`）
 
 ---
@@ -218,3 +230,4 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v3.1 | 2026-09-02 | 拆出 OPERATIONS v1.0（schema / view / 寫入規約 / 備份）；本檔改為純決策紀錄；修正 v3.0 章節編號重複（兩個「2.」）；加 §0 文件關係 |
 | v3.2 | 2026-09-02 | P3 完成：Dashboard/Goals/Tasks/Log 結構、relations 與三個缺少的 agent views 已部署；清理 `__noop__` 待辦。 |
 | v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
+| v3.4 | 2026-09-03 | P4 明確標記為 deferred、P5 未開始；停止維護 Notion 文件鏡像，指定 GitHub `beta` 為唯一文件來源；記錄 Local Bash 非 P4/P5 必要執行環境。 |

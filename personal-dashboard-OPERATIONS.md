@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.3 — 2026-09-03**
+**NORMATIVE — v1.4 — 2026-09-03**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -20,6 +20,7 @@ Three documents, distinct roles:
 - A direct user instruction overrides this document. When you depart from a rule here, say which rule and why.
 - If the live schema does not match §2, **stop and report**. Do not improvise a schema, do not create missing properties, do not guess a mapping.
 - Do not modify this document as part of ordinary operation. See §7.
+- Load all project documentation from the GitHub `beta` branch. The former Notion design/rules mirror was intentionally removed on 2026-09-03; do not search Notion for a documentation mirror.
 
 ---
 
@@ -228,10 +229,11 @@ Run through this before every write:
 - Owner: Peter.
 - Agents may **propose** changes to this document, in their reply to the user. Agents do not edit it.
 - Any schema, view, or protocol change requires a version bump here **before** the change is applied in Notion. Notion follows this document, not the other way round.
-- The authoritative copy is the one in the git repo. The Notion page is a convenience mirror and may lag.
+- The authoritative copies are the files in the GitHub `beta` branch. No Notion documentation mirror is maintained; fetch the designated branch before operating.
 
 | Version | Date | Change |
 |---|---|---|
+| v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |
 | v1.3 | 2026-09-03 | Replaced `Agent: Log 14d` with twelve calendar-month views, `Agent: Log 2026-01` through `Agent: Log 2026-12`; defined exact inclusive-start/exclusive-end boundaries and multi-month read behavior. |
 | v1.2 | 2026-09-02 | Recorded P3 view deployment: `Agent: Open Tasks`, `Agent: Active Goals`, and `Agent: OpID Lookup` now exist; all four normative views are live. |
 | v1.1 | 2026-09-02 | Promoted `Log.Goal` (`relation → Goals`) from planned to authoritative schema. Agents still write `GoalKey` only; `Goal` remains human-maintained. |
