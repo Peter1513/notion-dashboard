@@ -94,13 +94,13 @@ Schema 欄位定義見 `personal-dashboard-OPERATIONS.md` §2。建表或改 sch
 目前已存在的 agent views：
 
 ```text
-Agent: Log 14d
+Agent: Log 2026-01 ... Agent: Log 2026-12
 Agent: Open Tasks
 Agent: Active Goals
 Agent: OpID Lookup
 ```
 
-`Agent: Log 14d` 仍有已知缺陷：filter 是 hardcoded 日期，不是真正 rolling 14-day window。
+月度 Log view 採固定日曆月邊界：`Date >= 當月第一天` 且 `Date < 下月第一天`。未來月份可以預先建立，尚無 matching row 時正常回傳空陣列。
 
 ### 2. 接上互動路徑
 
@@ -254,7 +254,7 @@ Expected result:
 ```text
 1. 開啟任一 agent，確認 Notion 已連線
 2. 讓 agent 讀 OPERATIONS，取得 schema 與規約
-3. 讀 view: Agent: Log 14d / Agent: Open Tasks / Agent: Active Goals
+3. 依需求月份讀 Agent: Log YYYY-MM，並讀 Agent: Open Tasks / Agent: Active Goals
 4. 寫入 Log 或 Tasks，每列帶 OpID 與 Source
 5. 每週匯出 CSV 進 git repo
 ```
@@ -264,14 +264,15 @@ Expected result:
 Agent 讀取一律走 view mode。以 Claude Code 為例，指示 agent：
 
 ```text
-Read the "Agent: Log 14d" view via query_data_sources with mode "view".
+Read the exact "Agent: Log YYYY-MM" view for the requested month via query_data_sources with mode "view".
+For a range spanning months, read each monthly view separately and combine the results.
 Do not run SQL.
 ```
 
 Expected result:
 
 ```text
-回傳該 view 的列，不消耗 SQL 配額
+回傳指定月份的列；未來月份或空月份回傳空陣列，不消耗 SQL 配額
 ```
 
 ### Important Options
@@ -384,6 +385,7 @@ Tasks.Goal -> Goals relation created
 Agent: Open Tasks created
 Agent: Active Goals created
 Agent: OpID Lookup created
+Agent: Log 14d replaced by Agent: Log 2026-01 through Agent: Log 2026-12 (2026-09-03)
 ```
 
 尚未執行、僅為預期值的項目：排程路徑的 `curl` 檢查（P4/P5）。
@@ -470,44 +472,46 @@ Expected result:
 各自回傳結果，總和涵蓋所需資料
 ```
 
-### Log view returns nothing or stale rows
+### Monthly Log view returns unexpected rows
 
 Symptom:
 
 ```text
-Agent: Log 14d 回傳空陣列或明顯過舊的列
+Agent: Log YYYY-MM 回傳其他月份的列，或應有紀錄卻為空
 ```
 
 Diagnosis:
 
 ```text
-Fetch the Log database and read the view's advancedFilter value.
+Fetch the Log database and inspect the selected view's Date filters.
 ```
 
 Likely cause:
 
 ```text
-該 view 目前使用 hardcoded 日期（2026-08-19），非滾動 14 天視窗。時間一久即漂移。
+讀錯月份 view，或 month boundary 未採「當月第一天（含）至下月第一天（不含）」。
 ```
 
 Fix:
 
 ```text
-1. Open the Log database in Notion
-2. Open the "Agent: Log 14d" view filter
-3. Change the Date condition to a relative range covering the past 14 days
+1. Confirm the requested calendar month
+2. Open the exact "Agent: Log YYYY-MM" view
+3. Set Date >= YYYY-MM-01
+4. Set Date < next-month-01
+5. Keep Date sorted descending
 ```
 
 Verify:
 
 ```text
-Call notion-query-data-sources with mode "view" on the view again.
+Call notion-query-data-sources with mode "view" on that monthly view.
 ```
 
 Expected result:
 
 ```text
-回傳近 14 天的列
+只回傳該日曆月的列；尚無紀錄的月份回傳空陣列
 ```
 
 ## Project Structure
