@@ -1,7 +1,7 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.2
-- **日期**：2026-09-02
+- **版本**：v3.3
+- **日期**：2026-09-03
 - **狀態**：P1/P2/P3 完成，P4 起未動工
 
 ---
@@ -154,7 +154,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | 項目 | 結果 | 方法 |
 |---|---|---|
 | Workspace | `Peter Wang's Space`，ID `754f2ec5-7392-818d-8cfa-000384801235`，Free | `fetch self` |
-| `query_data_sources` view mode | **Free 可用，無 tool 配額** | 實際讀 `Agent: Log 14d` 成功 |
+| `query_data_sources` view mode | **Free 可用，無 tool 配額** | 實際讀 `Agent: Log 2026-09` 與 future-month `Agent: Log 2026-10` 成功 |
 | `query_data_sources` SQL 單源 | `available_with_limit`（配額數字未公開） | `fetch self` tool access map |
 | `query_multiple_data_sources` | `full_version_required`（Business + Notion AI） | 同上 |
 | `query_meeting_notes` | `plan_required` | 同上 |
@@ -162,7 +162,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | hosted MCP 非互動授權 | **不支援**。官方 FAQ：目前必須完成 OAuth flow，非互動授權開發中 | fetch 官方文件 |
 | internal connection | 靜態 token；需 workspace owner；頁面須手動 connect，否則 API 回錯 | 官方 authorization doc |
 | P3 workspace structure | `Dashboard` 下已有 `Goals`、`Tasks`、`Log`；`Log.Goal` 與 `Tasks.Goal` 都指向 `Goals` | 2026-09-02 MCP create/fetch/move verification |
-| P3 agent views | `Agent: Log 14d`、`Agent: Open Tasks`、`Agent: Active Goals`、`Agent: OpID Lookup` 皆存在 | 2026-09-02 MCP create/fetch verification |
+| Agent views | `Agent: Log 2026-01`～`2026-12`、`Agent: Open Tasks`、`Agent: Active Goals`、`Agent: OpID Lookup` 皆存在 | 2026-09-03 MCP create/fetch/view-mode verification |
 
 ### 引用他處、本人未逐一驗證
 
@@ -182,10 +182,12 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 ## 7. 建置進度
 
 ```text
-✅ P1  Log 表 + Agent: Log 14d view              (2026-09-02, by codex)
+✅ P1  Log 表 + initial agent Log view           (2026-09-02, by codex)
 ✅ P2  create → view mode read 驗證通過           (2026-09-02)
 ✅ P3  Dashboard + Goals + Tasks + Log；
        3 個新 agent views；Log.Goal relation       (2026-09-02)
+✅ P3.1 以 2026-01～2026-12 月度 Log views
+       取代 rolling 14-day view                    (2026-09-03)
 ⬜ P4  建 internal connection，只 connect Dashboard 子樹
        capabilities: Read + Insert only
 ⬜ P5  排程 script：append Log + weekly CSV export
@@ -194,7 +196,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 每完成一階段，同步更新 OPERATIONS 的 §2 / §3 對應狀態。**OPERATIONS 先改，Notion 後動** —— 文件領先實作，不是反過來。
 
 ### 待處理
-- `Agent: Log 14d` 的 hardcoded 日期需改為滾動視窗
+- 2027 年開始前，依同一個月度邊界規則建立 `Agent: Log 2027-01`～`2027-12`，並先更新 OPERATIONS 版本。
 
 ### 已清理
 - `__noop__` database 已於 2026-09-02 手動刪除，後續 workspace search 已確認 active workspace 不再存在該 database。
@@ -214,4 +216,5 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v2 | 2026-09-02 | 依 Free 方案實測收斂為 3 表；Area 改 select；agent 讀 view 不跑 SQL |
 | v3.0 | 2026-09-02 | 加 GoalKey 與 OpID；否決 write broker；確立雙路徑存取；修正 `update_page` 語意描述；撤回「Notion 唯一符合」與「Grok connectors 限付費」兩項錯誤陳述 |
 | v3.1 | 2026-09-02 | 拆出 OPERATIONS v1.0（schema / view / 寫入規約 / 備份）；本檔改為純決策紀錄；修正 v3.0 章節編號重複（兩個「2.」）；加 §0 文件關係 |
+| v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
 | v3.2 | 2026-09-02 | P3 完成：Dashboard/Goals/Tasks/Log 結構、relations 與三個缺少的 agent views 已部署；清理 `__noop__` 待辦。 |
