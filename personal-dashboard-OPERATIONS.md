@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.5 — 2026-09-09**
+**NORMATIVE — v1.6 — 2026-09-09**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -20,7 +20,7 @@ Three documents, distinct roles:
 - A direct user instruction overrides this document. When you depart from a rule here, say which rule and why.
 - If the live schema does not match §2, **stop and report**. Do not improvise a schema, do not create missing properties, do not guess a mapping.
 - Do not modify this document as part of ordinary operation. See §7.
-- Load all project documentation from the GitHub `beta` branch. The former Notion design/rules mirror was intentionally removed on 2026-09-03; do not search Notion for a documentation mirror.
+- Load all project documentation from this repository. If the user names a branch, use that branch; otherwise use the repository default branch. The former Notion design/rules mirror was intentionally removed on 2026-09-03; do not search Notion for a documentation mirror.
 
 ---
 
@@ -236,10 +236,11 @@ Run through this before every write:
 - Owner: Peter.
 - Agents may **propose** changes to this document, in their reply to the user. Agents do not edit it.
 - Any schema, view, or protocol change requires a version bump here **before** the change is applied in Notion. Notion follows this document, not the other way round.
-- The authoritative copies are the files in the GitHub `beta` branch. No Notion documentation mirror is maintained; fetch the designated branch before operating.
+- The authoritative copies are the files in this GitHub repository. No Notion documentation mirror is maintained; fetch the current documents before operating. Branch selection is the user's call, not a rule of this document.
 
 | Version | Date | Change |
 |---|---|---|
+| v1.6 | 2026-09-09 | Removed the `beta`-branch pointer from §0 and §7. Documentation source is now the repository itself; branch selection is the user's call and is no longer fixed by this document. Supersedes the branch clause recorded in v1.4. The no-Notion-mirror rule is unchanged. |
 | v1.5 | 2026-09-09 | Replaced the seven-value Area list with four life-domain values `Health | Wealth | Relationships | Happiness`; defined Area semantics, the Goal→Task/Log inheritance rule, and the legacy mapping. Area values on 6 existing Log rows were cleared by the human during migration (option removal); recorded as an accepted loss. Notion applied after this commit. |
 | v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |
 | v1.3 | 2026-09-03 | Replaced `Agent: Log 14d` with twelve calendar-month views, `Agent: Log 2026-01` through `Agent: Log 2026-12`; defined exact inclusive-start/exclusive-end boundaries and multi-month read behavior. |

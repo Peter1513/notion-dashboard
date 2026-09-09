@@ -1,6 +1,6 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.5
+- **版本**：v3.6
 - **日期**：2026-09-09
 - **狀態**：P1/P2/P3/P3.1 完成；P4 暫緩；P5 未開始
 
@@ -18,7 +18,7 @@
 
 **規則衝突時以 OPERATIONS 為準。** README 說明怎麼做，本檔解釋為什麼，兩者皆不定義規則。Agent 不應從本檔推導行為。
 
-權威副本只存在 GitHub `beta` branch。2026-09-03 起不再於 Notion 維護 DESIGN / OPERATIONS 文件鏡像；後續 agent 必須先讀指定 branch 的文件，而不是搜尋 Notion 內的規則頁。
+權威副本只存在本 GitHub repo。2026-09-03 起不再於 Notion 維護 DESIGN / OPERATIONS 文件鏡像；後續 agent 必須先讀 repo 內的文件，而不是搜尋 Notion 內的規則頁。branch 由使用者指定，不由文件釘死。
 
 ---
 
@@ -223,7 +223,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 
 ### 已清理
 - `__noop__` database 已於 2026-09-02 手動刪除，後續 workspace search 已確認 active workspace 不再存在該 database。
-- 舊 Notion DESIGN / rules 文件鏡像已於 2026-09-03 由 owner 手動移除；後續只使用 GitHub `beta` 文件。
+- 舊 Notion DESIGN / rules 文件鏡像已於 2026-09-03 由 owner 手動移除；後續只使用 GitHub repo 內的文件。
 
 ### 未解問題
 - ChatGPT 方案別未確認（影響 web 端是否可寫）
@@ -245,3 +245,4 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
 | v3.4 | 2026-09-03 | P4 明確標記為 deferred、P5 未開始；停止維護 Notion 文件鏡像，指定 GitHub `beta` 為唯一文件來源；記錄 Local Bash 非 P4/P5 必要執行環境。 |
 | v3.5 | 2026-09-09 | Area 由七值收斂為 Health / Wealth / Relationships / Happiness；新增 §5.1a 記錄理由與否決方案；對應 OPERATIONS v1.5。 |
+| v3.6 | 2026-09-09 | 移除文件內對 `beta` branch 的指定；文件來源改為「本 repo」，branch 由使用者決定。取代 v3.4 的 branch 條款；不維護 Notion 鏡像的決定不變。對應 OPERATIONS v1.6。 |
