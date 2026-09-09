@@ -1,7 +1,7 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.4
-- **日期**：2026-09-03
+- **版本**：v3.8
+- **日期**：2026-09-09
 - **狀態**：P1/P2/P3/P3.1 完成；P4 暫緩；P5 未開始
 
 ---
@@ -18,7 +18,7 @@
 
 **規則衝突時以 OPERATIONS 為準。** README 說明怎麼做，本檔解釋為什麼，兩者皆不定義規則。Agent 不應從本檔推導行為。
 
-權威副本只存在 GitHub `beta` branch。2026-09-03 起不再於 Notion 維護 DESIGN / OPERATIONS 文件鏡像；後續 agent 必須先讀指定 branch 的文件，而不是搜尋 Notion 內的規則頁。
+權威副本只存在本 GitHub repo。2026-09-03 起不再於 Notion 維護 DESIGN / OPERATIONS 文件鏡像；後續 agent 必須先讀 repo 內的文件，而不是搜尋 Notion 內的規則頁。branch 由使用者指定，不由文件釘死。
 
 ---
 
@@ -137,6 +137,19 @@ Schema 定義見 **OPERATIONS §2**。
 
 agent 單表查詢即可看到 area，免第二次 fetch，免跨表 SQL（Free 方案不支援多源 SQL）。代價是 area 沒有自己的 metadata 頁 —— 接受，因為 area 只是分類標籤，不是實體。
 
+### 5.1a Area 收斂為四值（v3.5）
+
+原七值（quanta / grad-school / etf / hardware / skills / fitness / career）在 2026-09-08 首次匯入 24 筆 Tasks 時暴露兩個問題：`skills` 成為 catch-all（7 筆，含 dashboard 本身與各軟體專案），`etf` 過窄無法容納信用卡與記帳。
+
+審核結論：Area 應回答「時間花在人生哪一塊」，而非「屬於哪個專案」；專案粒度已由 GoalKey 承載。採 Dan Koe 四市場 Health / Wealth / Relationships / Happiness 作為固定集合，理由：可枚舉、跨年不變、每個舊值都能唯一對應。Tasks / Log 的 Area 由所屬 Goal 繼承，agent 不自行判斷（參考 Ultimate Brain 的 Task→Project→Area 單鏈設計）。
+
+否決方案：
+- Area 改 multi_select —— 按 Area 統計會重複計數、每筆決策變慢、實務上退化為「每筆都貼兩個」。
+- 新增 `projects` 值 —— 層級錯置，等同把 PARA 的 Projects 塞進 Areas。
+- 保留七值僅改名 —— 治標，catch-all 問題會在下一個名字重演。
+
+代價：Wealth 會承載當前多數項目（quanta / career / grad-school / finance 全歸此），接受，因為它反映現階段實況。遷移時原 Log 6 筆的 Area 值隨舊 option 移除而清空，接受為一次性損失。
+
 ### 5.2 GoalKey(text) 與 Goal(relation) 並存
 
 官方文件：CSV 匯出後 relation 只剩 plain text URL，且 CSV 不能重新匯入重建 relation。
@@ -145,6 +158,23 @@ agent 單表查詢即可看到 area，免第二次 fetch，免跨表 SQL（Free 
 - `GoalKey` 服務匯出與 agent
 
 備份靠 GoalKey 還原拓樸。這是刻意的資料冗餘，不是設計疏漏。
+
+### 5.2a Status 用 status 型不用 select（v3.7）
+
+OPERATIONS v1.0–v1.6 一律把 Goals / Tasks 的 `Status` 定為 `select`；實際上 Peter 已於 2026-09-08 在 Notion UI 將兩表轉為原生 `status` 型（To-do / In progress / Complete 三分組）。2026-09-09 稽核後決定**文件遷就現況**，不改回 select。
+
+理由：`status` 是 Notion 對任務狀態的原生型別，board 與 group view 直接可用；agent 端讀寫的仍只是 option 名稱，寫入協定完全不變，因此改文件的成本低於改資料。
+
+否決方案：改回 `select`（可讓 live 與 v1.5 文件一致，但要放棄分組 UI，且是為了遷就一份本來就落後於實況的文件）。
+
+實測到的代價，兩項都已發生：
+
+1. `select → status` 轉型會**清空所有引用該欄的 view filter**。2026-09-09 稽核時 `Agent: Active Goals` 與 `Agent: Open Tasks` 的 `advancedFilter.filters` 皆為空陣列，兩個 view 因此回傳全表。
+2. Notion 轉型時會自動插入預設值 `Not started` 與 `In progress`，且 `Tasks` 的 `doing` 被 `In progress` 取代而消失。
+
+故 OPERATIONS v1.7 明列 group 歸屬、宣告兩個預設值非法、要求補回 `doing`，並已在 Notion 重建兩個 view 的 filter，並確認 `Not started` / `In progress` 不存在且 `Tasks.Status` 已恢復 `doing`。
+
+流程註記：本條款於 2026-09-09 已定案並產出 v1.6 補丁，但該補丁未 commit；`v1.6` / `v3.6` 版號隨後被「移除 beta branch 指定」一案佔用。此處以 v1.7 / v3.7 重新發布，內容與原決議等價。教訓：版號在 commit 落地前不算被佔用，決議與 commit 之間不應留下未追蹤的空窗。
 
 ### 5.3 OpID 取代 write broker
 
@@ -210,7 +240,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 
 ### 已清理
 - `__noop__` database 已於 2026-09-02 手動刪除，後續 workspace search 已確認 active workspace 不再存在該 database。
-- 舊 Notion DESIGN / rules 文件鏡像已於 2026-09-03 由 owner 手動移除；後續只使用 GitHub `beta` 文件。
+- 舊 Notion DESIGN / rules 文件鏡像已於 2026-09-03 由 owner 手動移除；後續只使用 GitHub repo 內的文件。
 
 ### 未解問題
 - ChatGPT 方案別未確認（影響 web 端是否可寫）
@@ -231,3 +261,7 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v3.2 | 2026-09-02 | P3 完成：Dashboard/Goals/Tasks/Log 結構、relations 與三個缺少的 agent views 已部署；清理 `__noop__` 待辦。 |
 | v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
 | v3.4 | 2026-09-03 | P4 明確標記為 deferred、P5 未開始；停止維護 Notion 文件鏡像，指定 GitHub `beta` 為唯一文件來源；記錄 Local Bash 非 P4/P5 必要執行環境。 |
+| v3.5 | 2026-09-09 | Area 由七值收斂為 Health / Wealth / Relationships / Happiness；新增 §5.1a 記錄理由與否決方案；對應 OPERATIONS v1.5。 |
+| v3.6 | 2026-09-09 | 移除文件內對 `beta` branch 的指定；文件來源改為「本 repo」，branch 由使用者決定。取代 v3.4 的 branch 條款；不維護 Notion 鏡像的決定不變。對應 OPERATIONS v1.6。 |
+| v3.7 | 2026-09-09 | Status 改採 Notion `status` 型並記錄轉型副作用（view filter 被清空、插入預設值、`doing` 遺失）；新增 §5.2a；補上原定 v3.6 但未 commit 的決議。對應 OPERATIONS v1.7。 |
+| v3.8 | 2026-09-09 | 記錄 Status migration 已在 Notion 套用完成並經 live fetch 驗證：兩個 Agent view filter 已重建，預設值已移除，`Tasks.Status` 已恢復 `doing`。對應 OPERATIONS v1.8。 |

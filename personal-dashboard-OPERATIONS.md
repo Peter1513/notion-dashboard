@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.4 — 2026-09-03**
+**NORMATIVE — v1.8 — 2026-09-09**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -20,7 +20,7 @@ Three documents, distinct roles:
 - A direct user instruction overrides this document. When you depart from a rule here, say which rule and why.
 - If the live schema does not match §2, **stop and report**. Do not improvise a schema, do not create missing properties, do not guess a mapping.
 - Do not modify this document as part of ordinary operation. See §7.
-- Load all project documentation from the GitHub `beta` branch. The former Notion design/rules mirror was intentionally removed on 2026-09-03; do not search Notion for a documentation mirror.
+- Load all project documentation from this repository. If the user names a branch, use that branch; otherwise use the repository default branch. The former Notion design/rules mirror was intentionally removed on 2026-09-03; do not search Notion for a documentation mirror.
 
 ---
 
@@ -48,7 +48,7 @@ Touching anything out of scope requires asking the user first, every time.
 | Key | text | Unique slug, human-assigned, e.g. `g-etf-2026q4`. Join key that survives CSV export. |
 | Area | select | See shared options below |
 | Horizon | select | `week` / `quarter` / `year` / `ongoing` |
-| Status | select | `active` / `paused` / `done` / `dropped` |
+| Status | status | `active` / `paused` / `done` / `dropped`. Notion `status` property, not `select`. Groups below. |
 | Metric | text | How it is measured |
 | Target | text | What counts as done |
 | NextReview | date | |
@@ -60,7 +60,7 @@ Touching anything out of scope requires asking the user first, every time.
 | Name | title | |
 | Due | date | Reminder only. Google Calendar is the calendar of record. |
 | Area | select | |
-| Status | select | `todo` / `doing` / `blocked` / `done` |
+| Status | status | `todo` / `doing` / `blocked` / `done`. Notion `status` property, not `select`. Groups below. |
 | GoalKey | text | Agents write this |
 | Goal | relation → Goals | Human-maintained in the UI. Agents never write it. |
 | Blocker | text | |
@@ -84,14 +84,32 @@ Touching anything out of scope requires asking the user first, every time.
 ### Shared select options
 
 ```text
-Area    : quanta | grad-school | etf | hardware | skills | fitness | career
+Area    : Health | Wealth | Relationships | Happiness
 Source  : manual | claude | codex | grok | script
 Horizon : week | quarter | year | ongoing
 Status  : (Goals) active | paused | done | dropped
           (Tasks) todo | doing | blocked | done
+
+Status groups (Notion status property; group names are UI-only):
+          Goals : To-do = paused | In progress = active | Complete = done, dropped
+          Tasks : To-do = todo   | In progress = doing, blocked | Complete = done
 ```
 
+**Status semantics** (added v1.7): `Goals.Status` and `Tasks.Status` are Notion `status` properties, not `select`. Agents read and write the option name only (`active`, `todo`, ...) and never the group name. The group exists for the Notion UI; it carries no meaning in this protocol and must not be written, filtered on, or inferred from.
+
+- No option outside the lists above may exist. Notion's built-in defaults `Not started` and `In progress` are **not** part of this schema and are to be removed.
+- `Tasks.Status` must contain `doing`. If it is missing, the schema is non-conforming; stop and report under §0.
+- View filters compare against the option name, never the group.
+- Converting this property between `select` and `status` silently empties every view filter that references it. After any such conversion, re-verify the filters listed in §3 before reading.
+
 ### Schema rules
+
+**Area semantics** (added v1.5): Area is a life domain, not a project bucket. Four values only (Dan Koe's four markets). Project-level grouping lives in `GoalKey`, never in Area.
+
+- Goals.Area is chosen by the human when the goal is created.
+- Tasks.Area and Log.Area MUST equal the Area of the Goal named by `GoalKey`. Agents copy it; they do not decide it. If `GoalKey` is empty, Area is empty.
+- Assignment rule for a new Goal: ask what the work ultimately feeds. Income / degree / savings → Wealth. Body → Health. People → Relationships. Done for its own sake, no return expected → Happiness. If undecided after a few seconds, choose Wealth.
+- Legacy mapping (for reading pre-v1.5 history only; these values no longer exist in Notion): Health ← fitness; Wealth ← quanta, career, etf, grad-school; Happiness ← hardware, skills.
 
 - Never write a select value that is not listed above. If the value you need does not exist, write the closest listed value and note the gap in your reply to the user.
 - Never add, rename, retype, or remove a property. Never add a select option.
@@ -114,6 +132,8 @@ Read through saved views only.
 | `Agent: OpID Lookup` | Log | none | Date desc |
 
 The monthly Log views `Agent: Log 2026-01` through `Agent: Log 2026-12` currently exist. The other three views listed above also exist.
+
+**Status-migration verification (2026-09-09):** Live Notion matches the v1.7 Status schema. `Agent: Active Goals` filters `Status is active`; `Agent: Open Tasks` filters `Status is not done`. The built-in defaults `Not started` / `In progress` are absent, and `Tasks.Status` contains `doing`.
 
 **Rules**
 
@@ -229,10 +249,14 @@ Run through this before every write:
 - Owner: Peter.
 - Agents may **propose** changes to this document, in their reply to the user. Agents do not edit it.
 - Any schema, view, or protocol change requires a version bump here **before** the change is applied in Notion. Notion follows this document, not the other way round.
-- The authoritative copies are the files in the GitHub `beta` branch. No Notion documentation mirror is maintained; fetch the designated branch before operating.
+- The authoritative copies are the files in this GitHub repository. No Notion documentation mirror is maintained; fetch the current documents before operating. Branch selection is the user's call, not a rule of this document.
 
 | Version | Date | Change |
 |---|---|---|
+| v1.8 | 2026-09-09 | Recorded post-migration live verification: the Status option sets match §2, `Agent: Active Goals` filters `Status is active`, and `Agent: Open Tasks` filters `Status is not done`. |
+| v1.7 | 2026-09-09 | `Goals.Status` and `Tasks.Status` recorded as Notion `status` type, matching the live property; defined group membership and the option-name-only rule. Declared `Not started` / `In progress` non-conforming and `doing` required. Noted that select<->status conversion empties dependent view filters. This clause was decided for v1.6 but never committed; the v1.6 slot was taken by the branch-pointer change. Notion was applied after this commit; the `Agent: Active Goals` and `Agent: Open Tasks` filters were re-established and verified. |
+| v1.6 | 2026-09-09 | Removed the `beta`-branch pointer from §0 and §7. Documentation source is now the repository itself; branch selection is the user's call and is no longer fixed by this document. Supersedes the branch clause recorded in v1.4. The no-Notion-mirror rule is unchanged. |
+| v1.5 | 2026-09-09 | Replaced the seven-value Area list with four life-domain values `Health | Wealth | Relationships | Happiness`; defined Area semantics, the Goal→Task/Log inheritance rule, and the legacy mapping. Area values on 6 existing Log rows were cleared by the human during migration (option removal); recorded as an accepted loss. Notion applied after this commit. |
 | v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |
 | v1.3 | 2026-09-03 | Replaced `Agent: Log 14d` with twelve calendar-month views, `Agent: Log 2026-01` through `Agent: Log 2026-12`; defined exact inclusive-start/exclusive-end boundaries and multi-month read behavior. |
 | v1.2 | 2026-09-02 | Recorded P3 view deployment: `Agent: Open Tasks`, `Agent: Active Goals`, and `Agent: OpID Lookup` now exist; all four normative views are live. |

@@ -23,7 +23,7 @@
 
 解決的問題：個人紀錄散落各處，且多個 AI agent 各自寫入時無法追溯來源、無法還原誤寫。
 
-> 專案文件只以 GitHub `beta` branch 為來源。Notion 內不維護 DESIGN / OPERATIONS 鏡像；操作前先讀指定 branch 的文件。
+> 專案文件以本 GitHub repo 為來源。Notion 內不維護 DESIGN / OPERATIONS 鏡像；操作前先讀 repo 內的文件（使用者指定 branch 則從之，否則用 repo default branch）。
 
 ## Requirements
 
@@ -228,7 +228,7 @@ notion 顯示為已連線
 ### Common Workflow
 
 ```text
-1. Fetch README / OPERATIONS / DESIGN from GitHub beta
+1. Fetch README / OPERATIONS / DESIGN from this GitHub repo (user-named branch, else the default branch)
 2. 開啟任一 agent，確認 Notion 已連線
 3. 依需求月份讀 Agent: Log YYYY-MM，並讀 Agent: Open Tasks / Agent: Active Goals
 4. 寫入 Log 或 Tasks，每列帶 OpID 與 Source
@@ -264,8 +264,8 @@ Expected result:
 Schema 或 view 變更一律文件先行：
 
 ```text
-1. Edit personal-dashboard-OPERATIONS.md on beta, bump its version
-2. Commit to beta
+1. Edit personal-dashboard-OPERATIONS.md in the repo, bump its version
+2. Commit it
 3. Apply the change in Notion
 4. Re-run the smoke test in Verification
 5. If Notion and OPERATIONS disagree, OPERATIONS wins; fix Notion
@@ -507,4 +507,4 @@ Main files:
 - `personal-dashboard-OPERATIONS.md`: 規範性文件。schema、view、agent 寫入規約、復原範圍。Agent 必須遵循；規則衝突時以此檔為準。
 - `personal-dashboard-DESIGN.md`: 決策紀錄。選型理由、被否決的方案、已驗證與未驗證的事實。
 
-All three are maintained on GitHub `beta`; no Notion documentation mirror is maintained.
+All three are maintained in this GitHub repo; no Notion documentation mirror is maintained.
