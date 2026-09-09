@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.7 — 2026-09-09**
+**NORMATIVE — v1.8 — 2026-09-09**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -133,6 +133,8 @@ Read through saved views only.
 
 The monthly Log views `Agent: Log 2026-01` through `Agent: Log 2026-12` currently exist. The other three views listed above also exist.
 
+**Status-migration verification (2026-09-09):** Live Notion matches the v1.7 Status schema. `Agent: Active Goals` filters `Status is active`; `Agent: Open Tasks` filters `Status is not done`. The built-in defaults `Not started` / `In progress` are absent, and `Tasks.Status` contains `doing`.
+
 **Rules**
 
 - Use `query_data_sources` with `mode: "view"`.
@@ -251,7 +253,8 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
-| v1.7 | 2026-09-09 | `Goals.Status` and `Tasks.Status` recorded as Notion `status` type, matching the live property; defined group membership and the option-name-only rule. Declared `Not started` / `In progress` non-conforming and `doing` required. Noted that select<->status conversion empties dependent view filters. This clause was decided for v1.6 but never committed; the v1.6 slot was taken by the branch-pointer change. Notion to be applied after this commit, including re-establishing the `Agent: Active Goals` and `Agent: Open Tasks` filters. |
+| v1.8 | 2026-09-09 | Recorded post-migration live verification: the Status option sets match §2, `Agent: Active Goals` filters `Status is active`, and `Agent: Open Tasks` filters `Status is not done`. |
+| v1.7 | 2026-09-09 | `Goals.Status` and `Tasks.Status` recorded as Notion `status` type, matching the live property; defined group membership and the option-name-only rule. Declared `Not started` / `In progress` non-conforming and `doing` required. Noted that select<->status conversion empties dependent view filters. This clause was decided for v1.6 but never committed; the v1.6 slot was taken by the branch-pointer change. Notion was applied after this commit; the `Agent: Active Goals` and `Agent: Open Tasks` filters were re-established and verified. |
 | v1.6 | 2026-09-09 | Removed the `beta`-branch pointer from §0 and §7. Documentation source is now the repository itself; branch selection is the user's call and is no longer fixed by this document. Supersedes the branch clause recorded in v1.4. The no-Notion-mirror rule is unchanged. |
 | v1.5 | 2026-09-09 | Replaced the seven-value Area list with four life-domain values `Health | Wealth | Relationships | Happiness`; defined Area semantics, the Goal→Task/Log inheritance rule, and the legacy mapping. Area values on 6 existing Log rows were cleared by the human during migration (option removal); recorded as an accepted loss. Notion applied after this commit. |
 | v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |

@@ -1,6 +1,6 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.7
+- **版本**：v3.8
 - **日期**：2026-09-09
 - **狀態**：P1/P2/P3/P3.1 完成；P4 暫緩；P5 未開始
 
@@ -172,7 +172,7 @@ OPERATIONS v1.0–v1.6 一律把 Goals / Tasks 的 `Status` 定為 `select`；�
 1. `select → status` 轉型會**清空所有引用該欄的 view filter**。2026-09-09 稽核時 `Agent: Active Goals` 與 `Agent: Open Tasks` 的 `advancedFilter.filters` 皆為空陣列，兩個 view 因此回傳全表。
 2. Notion 轉型時會自動插入預設值 `Not started` 與 `In progress`，且 `Tasks` 的 `doing` 被 `In progress` 取代而消失。
 
-故 OPERATIONS v1.7 明列 group 歸屬、宣告兩個預設值非法、要求補回 `doing`，並在 commit 後於 Notion 重建兩個 view 的 filter。
+故 OPERATIONS v1.7 明列 group 歸屬、宣告兩個預設值非法、要求補回 `doing`，並已在 Notion 重建兩個 view 的 filter，並確認 `Not started` / `In progress` 不存在且 `Tasks.Status` 已恢復 `doing`。
 
 流程註記：本條款於 2026-09-09 已定案並產出 v1.6 補丁，但該補丁未 commit；`v1.6` / `v3.6` 版號隨後被「移除 beta branch 指定」一案佔用。此處以 v1.7 / v3.7 重新發布，內容與原決議等價。教訓：版號在 commit 落地前不算被佔用，決議與 commit 之間不應留下未追蹤的空窗。
 
@@ -264,3 +264,4 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v3.5 | 2026-09-09 | Area 由七值收斂為 Health / Wealth / Relationships / Happiness；新增 §5.1a 記錄理由與否決方案；對應 OPERATIONS v1.5。 |
 | v3.6 | 2026-09-09 | 移除文件內對 `beta` branch 的指定；文件來源改為「本 repo」，branch 由使用者決定。取代 v3.4 的 branch 條款；不維護 Notion 鏡像的決定不變。對應 OPERATIONS v1.6。 |
 | v3.7 | 2026-09-09 | Status 改採 Notion `status` 型並記錄轉型副作用（view filter 被清空、插入預設值、`doing` 遺失）；新增 §5.2a；補上原定 v3.6 但未 commit 的決議。對應 OPERATIONS v1.7。 |
+| v3.8 | 2026-09-09 | 記錄 Status migration 已在 Notion 套用完成並經 live fetch 驗證：兩個 Agent view filter 已重建，預設值已移除，`Tasks.Status` 已恢復 `doing`。對應 OPERATIONS v1.8。 |
