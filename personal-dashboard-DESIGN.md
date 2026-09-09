@@ -1,7 +1,7 @@
 # Personal Dashboard — 設計決策紀錄
 
-- **版本**：v3.4
-- **日期**：2026-09-03
+- **版本**：v3.5
+- **日期**：2026-09-09
 - **狀態**：P1/P2/P3/P3.1 完成；P4 暫緩；P5 未開始
 
 ---
@@ -137,6 +137,19 @@ Schema 定義見 **OPERATIONS §2**。
 
 agent 單表查詢即可看到 area，免第二次 fetch，免跨表 SQL（Free 方案不支援多源 SQL）。代價是 area 沒有自己的 metadata 頁 —— 接受，因為 area 只是分類標籤，不是實體。
 
+### 5.1a Area 收斂為四值（v3.5）
+
+原七值（quanta / grad-school / etf / hardware / skills / fitness / career）在 2026-09-08 首次匯入 24 筆 Tasks 時暴露兩個問題：`skills` 成為 catch-all（7 筆，含 dashboard 本身與各軟體專案），`etf` 過窄無法容納信用卡與記帳。
+
+審核結論：Area 應回答「時間花在人生哪一塊」，而非「屬於哪個專案」；專案粒度已由 GoalKey 承載。採 Dan Koe 四市場 Health / Wealth / Relationships / Happiness 作為固定集合，理由：可枚舉、跨年不變、每個舊值都能唯一對應。Tasks / Log 的 Area 由所屬 Goal 繼承，agent 不自行判斷（參考 Ultimate Brain 的 Task→Project→Area 單鏈設計）。
+
+否決方案：
+- Area 改 multi_select —— 按 Area 統計會重複計數、每筆決策變慢、實務上退化為「每筆都貼兩個」。
+- 新增 `projects` 值 —— 層級錯置，等同把 PARA 的 Projects 塞進 Areas。
+- 保留七值僅改名 —— 治標，catch-all 問題會在下一個名字重演。
+
+代價：Wealth 會承載當前多數項目（quanta / career / grad-school / finance 全歸此），接受，因為它反映現階段實況。遷移時原 Log 6 筆的 Area 值隨舊 option 移除而清空，接受為一次性損失。
+
 ### 5.2 GoalKey(text) 與 Goal(relation) 並存
 
 官方文件：CSV 匯出後 relation 只剩 plain text URL，且 CSV 不能重新匯入重建 relation。
@@ -231,3 +244,4 @@ OpID 方案的誠實評價：**不是原子操作，理論上仍有 TOCTOU race�
 | v3.2 | 2026-09-02 | P3 完成：Dashboard/Goals/Tasks/Log 結構、relations 與三個缺少的 agent views 已部署；清理 `__noop__` 待辦。 |
 | v3.3 | 2026-09-03 | 將 `Agent: Log 14d` 改為 2026 全年十二個月度 views；驗證 future-month view 可建立並以 view mode 回傳空陣列。 |
 | v3.4 | 2026-09-03 | P4 明確標記為 deferred、P5 未開始；停止維護 Notion 文件鏡像，指定 GitHub `beta` 為唯一文件來源；記錄 Local Bash 非 P4/P5 必要執行環境。 |
+| v3.5 | 2026-09-09 | Area 由七值收斂為 Health / Wealth / Relationships / Happiness；新增 §5.1a 記錄理由與否決方案；對應 OPERATIONS v1.5。 |

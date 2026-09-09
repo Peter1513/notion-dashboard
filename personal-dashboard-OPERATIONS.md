@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.4 — 2026-09-03**
+**NORMATIVE — v1.5 — 2026-09-09**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -84,7 +84,7 @@ Touching anything out of scope requires asking the user first, every time.
 ### Shared select options
 
 ```text
-Area    : quanta | grad-school | etf | hardware | skills | fitness | career
+Area    : Health | Wealth | Relationships | Happiness
 Source  : manual | claude | codex | grok | script
 Horizon : week | quarter | year | ongoing
 Status  : (Goals) active | paused | done | dropped
@@ -92,6 +92,13 @@ Status  : (Goals) active | paused | done | dropped
 ```
 
 ### Schema rules
+
+**Area semantics** (added v1.5): Area is a life domain, not a project bucket. Four values only (Dan Koe's four markets). Project-level grouping lives in `GoalKey`, never in Area.
+
+- Goals.Area is chosen by the human when the goal is created.
+- Tasks.Area and Log.Area MUST equal the Area of the Goal named by `GoalKey`. Agents copy it; they do not decide it. If `GoalKey` is empty, Area is empty.
+- Assignment rule for a new Goal: ask what the work ultimately feeds. Income / degree / savings → Wealth. Body → Health. People → Relationships. Done for its own sake, no return expected → Happiness. If undecided after a few seconds, choose Wealth.
+- Legacy mapping (for reading pre-v1.5 history only; these values no longer exist in Notion): Health ← fitness; Wealth ← quanta, career, etf, grad-school; Happiness ← hardware, skills.
 
 - Never write a select value that is not listed above. If the value you need does not exist, write the closest listed value and note the gap in your reply to the user.
 - Never add, rename, retype, or remove a property. Never add a select option.
@@ -233,6 +240,7 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.5 | 2026-09-09 | Replaced the seven-value Area list with four life-domain values `Health | Wealth | Relationships | Happiness`; defined Area semantics, the Goal→Task/Log inheritance rule, and the legacy mapping. Area values on 6 existing Log rows were cleared by the human during migration (option removal); recorded as an accepted loss. Notion applied after this commit. |
 | v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |
 | v1.3 | 2026-09-03 | Replaced `Agent: Log 14d` with twelve calendar-month views, `Agent: Log 2026-01` through `Agent: Log 2026-12`; defined exact inclusive-start/exclusive-end boundaries and multi-month read behavior. |
 | v1.2 | 2026-09-02 | Recorded P3 view deployment: `Agent: Open Tasks`, `Agent: Active Goals`, and `Agent: OpID Lookup` now exist; all four normative views are live. |
