@@ -1,6 +1,6 @@
 # Personal Dashboard — Agent Operating Rules
 
-**NORMATIVE — v1.6 — 2026-09-09**
+**NORMATIVE — v1.7 — 2026-09-09**
 
 Load this document before operating on the dashboard. Follow it literally.
 
@@ -48,7 +48,7 @@ Touching anything out of scope requires asking the user first, every time.
 | Key | text | Unique slug, human-assigned, e.g. `g-etf-2026q4`. Join key that survives CSV export. |
 | Area | select | See shared options below |
 | Horizon | select | `week` / `quarter` / `year` / `ongoing` |
-| Status | select | `active` / `paused` / `done` / `dropped` |
+| Status | status | `active` / `paused` / `done` / `dropped`. Notion `status` property, not `select`. Groups below. |
 | Metric | text | How it is measured |
 | Target | text | What counts as done |
 | NextReview | date | |
@@ -60,7 +60,7 @@ Touching anything out of scope requires asking the user first, every time.
 | Name | title | |
 | Due | date | Reminder only. Google Calendar is the calendar of record. |
 | Area | select | |
-| Status | select | `todo` / `doing` / `blocked` / `done` |
+| Status | status | `todo` / `doing` / `blocked` / `done`. Notion `status` property, not `select`. Groups below. |
 | GoalKey | text | Agents write this |
 | Goal | relation → Goals | Human-maintained in the UI. Agents never write it. |
 | Blocker | text | |
@@ -89,7 +89,18 @@ Source  : manual | claude | codex | grok | script
 Horizon : week | quarter | year | ongoing
 Status  : (Goals) active | paused | done | dropped
           (Tasks) todo | doing | blocked | done
+
+Status groups (Notion status property; group names are UI-only):
+          Goals : To-do = paused | In progress = active | Complete = done, dropped
+          Tasks : To-do = todo   | In progress = doing, blocked | Complete = done
 ```
+
+**Status semantics** (added v1.7): `Goals.Status` and `Tasks.Status` are Notion `status` properties, not `select`. Agents read and write the option name only (`active`, `todo`, ...) and never the group name. The group exists for the Notion UI; it carries no meaning in this protocol and must not be written, filtered on, or inferred from.
+
+- No option outside the lists above may exist. Notion's built-in defaults `Not started` and `In progress` are **not** part of this schema and are to be removed.
+- `Tasks.Status` must contain `doing`. If it is missing, the schema is non-conforming; stop and report under §0.
+- View filters compare against the option name, never the group.
+- Converting this property between `select` and `status` silently empties every view filter that references it. After any such conversion, re-verify the filters listed in §3 before reading.
 
 ### Schema rules
 
@@ -240,6 +251,7 @@ Run through this before every write:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.7 | 2026-09-09 | `Goals.Status` and `Tasks.Status` recorded as Notion `status` type, matching the live property; defined group membership and the option-name-only rule. Declared `Not started` / `In progress` non-conforming and `doing` required. Noted that select<->status conversion empties dependent view filters. This clause was decided for v1.6 but never committed; the v1.6 slot was taken by the branch-pointer change. Notion to be applied after this commit, including re-establishing the `Agent: Active Goals` and `Agent: Open Tasks` filters. |
 | v1.6 | 2026-09-09 | Removed the `beta`-branch pointer from §0 and §7. Documentation source is now the repository itself; branch selection is the user's call and is no longer fixed by this document. Supersedes the branch clause recorded in v1.4. The no-Notion-mirror rule is unchanged. |
 | v1.5 | 2026-09-09 | Replaced the seven-value Area list with four life-domain values `Health | Wealth | Relationships | Happiness`; defined Area semantics, the Goal→Task/Log inheritance rule, and the legacy mapping. Area values on 6 existing Log rows were cleared by the human during migration (option removal); recorded as an accepted loss. Notion applied after this commit. |
 | v1.4 | 2026-09-03 | Removed the Notion documentation-mirror assumption. The GitHub `beta` branch is now the sole documentation source for dashboard operation. |
