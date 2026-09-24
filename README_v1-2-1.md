@@ -1,6 +1,6 @@
 # README v1.2.1 — Notion Dashboard
 
-> **來源限制**：本文件內容**僅**由 `SCHEMA_v1-2-1.yaml` 與 `OPERATIONS_v1-2-1.md` 推導。未引用 v1-1 / v2 / v1 discovery 文件，亦未查詢線上 Notion 實況。兩份來源未涵蓋者一律列於「未知 / 待查」，不臆測。
+> **來源限制**：本文件內容**僅**由 `SCHEMA_v1-2-1.yaml` 與 `OPERATIONS_v1-2-1.md` 推導。未引用 v1-1 / v2 / v1 discovery 文件。線上 Notion 實況核對結果見 §10「已驗證」。兩份來源未涵蓋者一律列於「未知 / 待查」，不臆測。
 
 ---
 
