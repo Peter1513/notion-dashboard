@@ -1,0 +1,265 @@
+schema_version: "1.2.1"
+
+dashboard:
+  logical:
+    key: dashboard
+    title: Dashboard_beta
+  runtime:
+    page_id: 3dcf2ec5-7392-81e3-bb60-eb677606e779
+
+databases:
+  goals:
+    logical:
+      key: databases.goals
+      title: Goals
+      parent: dashboard
+
+      properties:
+        name:
+          notion_name: Name
+          type: title
+
+        status:
+          notion_name: Status
+          type: status
+          options:
+            paused:
+              group: to_do
+            active:
+              group: in_progress
+            dropped:
+              group: complete
+            done:
+              group: complete
+
+        id:
+          notion_name: ID
+          type: auto_increment_id
+
+      views:
+        default:
+          notion_name: Default view
+          type: table
+          properties:
+            - name
+            - status
+            - id
+          filter: none
+          sort: none
+
+        agent_all:
+          notion_name: "Agent: All Goals"
+          type: table
+          properties:
+            - name
+            - status
+            - id
+          filter: none
+          sort: none
+
+    runtime:
+      database_id: 898c5b09-718d-44e7-896e-bc5c15e2a075
+      data_source_id: 551c054b-d021-4871-b0d9-b324dde090c7
+      views:
+        default:
+          view_id: 7368aaf4-3f71-4069-a473-9ccd6f659c69
+        agent_all:
+          view_id: 3ddf2ec5-7392-817e-9524-000cb2b09c72
+
+  tasks:
+    logical:
+      key: databases.tasks
+      title: Tasks
+      parent: dashboard
+
+      properties:
+        name:
+          notion_name: Name
+          type: title
+
+        status:
+          notion_name: Status
+          type: status
+          options:
+            todo:
+              group: to_do
+            doing:
+              group: in_progress
+            blocked:
+              group: in_progress
+            dropped:
+              group: complete
+            done:
+              group: complete
+
+        seq:
+          notion_name: Seq
+          type: number
+
+        goal:
+          notion_name: Goal
+          type: relation
+          target: databases.goals
+
+        id:
+          notion_name: ID
+          type: auto_increment_id
+
+      views:
+        default:
+          notion_name: Default view
+          type: table
+          properties:
+            - name
+            - status
+            - seq
+            - goal
+            - id
+          filter: none
+          sort: none
+
+        agent_all:
+          notion_name: "Agent: All Tasks"
+          type: table
+          properties:
+            - name
+            - status
+            - seq
+            - goal
+            - id
+          filter: none
+          sort:
+            - property: seq
+              direction: ascending
+
+    runtime:
+      database_id: ca4f98bc-8a8f-48fa-ae54-64608b8d45d8
+      data_source_id: f56a6d7c-f8b0-404a-9f1f-cb9ac5039734
+      views:
+        default:
+          view_id: e27d6f41-2942-40a6-9644-52b800df5715
+        agent_all:
+          view_id: 3ddf2ec5-7392-812d-84d8-000c1102cfea
+
+  log:
+    logical:
+      key: databases.log
+      title: Log
+      parent: dashboard
+
+      properties:
+        name:
+          notion_name: Name
+          type: title
+
+        id:
+          notion_name: ID
+          type: auto_increment_id
+
+        date:
+          notion_name: Date
+          type: date
+
+        delta:
+          notion_name: Delta
+          type: text
+
+        evidence:
+          notion_name: Evidence
+          type: url
+
+        source:
+          notion_name: Source
+          type: select
+          options:
+            - manual
+            - claude
+            - codex
+            - grok
+
+      views:
+        default:
+          notion_name: Default view
+          type: table
+          properties:
+            - name
+            - date
+            - delta
+            - evidence
+            - id
+            - source
+          filter: none
+          sort: none
+
+        agent_all:
+          notion_name: "Agent: All Log"
+          type: table
+          properties:
+            - date
+            - name
+            - source
+            - delta
+            - evidence
+            - id
+          filter: none
+          sort:
+            - property: date
+              direction: descending
+
+    runtime:
+      database_id: 4d962641-23f7-4d0c-a1d8-e3fc0c285053
+      data_source_id: c224ddf5-7092-41e2-a208-856470fdb8a9
+      views:
+        default:
+          view_id: 43ecc8ba-864c-44ba-8e58-58c2c1301d97
+        agent_all:
+          view_id: 3ddf2ec5-7392-8151-9f44-000cf0dc7f8d
+
+resolution:
+  rules:
+    - runtime IDs are instance-specific and must not be treated as schema identity
+    - logical keys are the stable identifiers used by agents
+    - relation targets must reference logical keys
+    - candidates must be validated against the expected logical schema before binding runtime IDs
+
+  lookup:
+    dashboard:
+      type: page
+      title: Dashboard_beta
+
+    databases:
+      goals:
+        parent: dashboard
+        type: database
+        title: Goals
+
+      tasks:
+        parent: dashboard
+        type: database
+        title: Tasks
+
+      log:
+        parent: dashboard
+        type: database
+        title: Log
+
+binding_policy:
+  stable:
+    - logical keys
+    - database roles
+    - property semantic keys
+    - property types
+    - status and select semantics
+    - relation targets
+    - view semantic keys
+    - view property definitions
+    - view sorting rules
+
+  runtime_only:
+    - page_id
+    - database_id
+    - data_source_id
+    - view_id
+    - collection URI
+    - view URI
+    - Notion page URL
