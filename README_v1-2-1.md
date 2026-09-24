@@ -6,10 +6,10 @@
 
 ## 1. 系統概觀
 
-一個 Notion page（`Dashboard_beta`）底下掛三個 database，供多個 agent（claude / codex / grok）與人工共同讀寫。
+一個 Notion page（`Dashboard`）底下掛三個 database，供多個 agent（claude / codex / grok）與人工共同讀寫。
 
 ```
-Dashboard_beta (page)
+Dashboard (page)
 ├── Goals   (database)
 ├── Tasks   (database)  ──relation(Goal)──> Goals
 └── Log     (database)
@@ -137,7 +137,7 @@ Schema 分兩層，這是 v1.2.1 的核心設計：
 
 依 `resolution.lookup` 與 `logical` 定義重建一個實例：
 
-1. 建立 page，title = `Dashboard_beta`。
+1. 建立 page，title = `Dashboard`。
 2. 在該 page 底下建立三個 database：`Goals`、`Tasks`、`Log`。
 3. 依 §3 建立各 database 的 properties（Notion 名稱與型別須完全吻合）。
 4. 建立 `Tasks.Goal` relation，指向 `Goals`。
@@ -153,7 +153,7 @@ Schema 分兩層，這是 v1.2.1 的核心設計：
 
 Agent 啟動時的綁定順序：
 
-1. **定位 dashboard**：`type: page`、`title: Dashboard_beta`。
+1. **定位 dashboard**：`type: page`、`title: Dashboard`。
 2. **定位 databases**：各自以 `parent: dashboard` + `type: database` + `title`（`Goals` / `Tasks` / `Log`）查找。
 3. **驗證候選**：比對 logical schema — property 語意鍵、型別、status/select 語意、relation target、view 語意鍵與欄位定義、view 排序規則。
 4. **綁定 runtime ID**：驗證通過後才寫入 `page_id` / `database_id` / `data_source_id` / `view_id`。
@@ -247,4 +247,4 @@ return record
 
 **假設**（為讀懂來源所作，未經驗證）：`GOALS` / `TASKS` / `LOG` 三個常數對應 schema 的 `databases.goals` / `databases.tasks` / `databases.log`。
 
-**待查**：本文件僅依兩份來源撰寫，尚未與線上 `Dashboard_beta` 實況核對；runtime ID 是否仍有效未驗證。
+**待查**：本文件僅依兩份來源撰寫，尚未與線上 `Dashboard` 實況核對；runtime ID 是否仍有效未驗證。 2026-09-24 Dashboard_beta renamed to Dashboard; old Dashboard (3cff2ec5-7392-81c8-9f47-c7bebfb143eb) is in trash.

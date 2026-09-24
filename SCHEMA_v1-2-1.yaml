@@ -3,7 +3,7 @@ schema_version: "1.2.1"
 dashboard:
   logical:
     key: dashboard
-    title: Dashboard_beta
+    title: Dashboard
   runtime:
     page_id: 3dcf2ec5-7392-81e3-bb60-eb677606e779
 
@@ -221,11 +221,12 @@ resolution:
     - logical keys are the stable identifiers used by agents
     - relation targets must reference logical keys
     - candidates must be validated against the expected logical schema before binding runtime IDs
+    - lookup must exclude pages in trash (deleted)
 
   lookup:
     dashboard:
       type: page
-      title: Dashboard_beta
+      title: Dashboard
 
     databases:
       goals:
