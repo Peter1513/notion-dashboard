@@ -247,4 +247,7 @@ return record
 
 **假設**（為讀懂來源所作，未經驗證）：`GOALS` / `TASKS` / `LOG` 三個常數對應 schema 的 `databases.goals` / `databases.tasks` / `databases.log`。
 
-**待查**：本文件僅依兩份來源撰寫，尚未與線上 `Dashboard` 實況核對；runtime ID 是否仍有效未驗證。 2026-09-24 Dashboard_beta renamed to Dashboard; old Dashboard (3cff2ec5-7392-81c8-9f47-c7bebfb143eb) is in trash.
+**已驗證**（2026-09-24）：線上 `Dashboard`（page 3dcf2ec5-7392-81e3-bb60-eb677606e779）的 properties、types、status groups、select options、relation target、6 個 views（欄位順序／排序／無 filter）與 runtime ID，逐項比對 SCHEMA v1.2.1 全數相符。
+
+**變更紀錄**：
+- 2026-09-24 `Dashboard_beta` 更名為 `Dashboard`；舊 `Dashboard`（3cff2ec5-7392-81c8-9f47-c7bebfb143eb）已移至垃圾桶。
